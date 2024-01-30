@@ -20,4 +20,8 @@ JKL     BNM
 
 SIDE BUTTON ????????
 
-res 1822x1016
+## Resolution
+Top Left Corner (38,16)
+Bottom Right Corner (1254,700)
+
+Usable Space: (1216, 68)

@@ -32,7 +32,7 @@ def main():
     pygame.font.init()
     my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    pygame.key.set_repeat(200, 0)
+    pygame.key.set_repeat(1, 0)
 
     shift = False
 
