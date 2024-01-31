@@ -2,6 +2,9 @@
 
 contains a whole lot of other really useless garbage
 
+./acmenu => main menu
+./display_calibrator => used for figuring out where the hell the corners of the screen are in pixel space
+
 ## Button Mapping
 YELLOW WHITE BLACK
 GREEN RED BLUE

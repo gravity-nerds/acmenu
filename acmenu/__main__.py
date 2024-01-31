@@ -2,9 +2,9 @@ import os
 import threading
 import json
 
-import menu
+from menu import Menu 
 
-class main:
+class Core:
 
     config = None
     threads = {}
@@ -14,7 +14,16 @@ class main:
             self.config = json.loads(f.read())
 
     def start(self):
-        self.threads["menu"] = 
+        self.threads["menu"] = Menu(self)
+
+        for thread in self.threads.values():
+            thread.start()
         
 
-main()
+def main():
+    core = Core()
+    core.start()
+
+
+if __name__ == "__main__":
+    main()
