@@ -4,7 +4,7 @@ import threading
 from libraries.Vec2 import *
 from elements.Text import *
 
-class Menu(threading.Thread):
+class Menu():
 
     alive = True
     f3_held = False
@@ -13,16 +13,15 @@ class Menu(threading.Thread):
     clock = pygame.time.Clock()
 
     def __init__(self, acmenu):
-        threading.Thread.__init__(self)
 
-        print(acmenu.config["dev"])
         if acmenu.config["dev"]:
             self.screen = pygame.display.set_mode((1000, 500), pygame.RESIZABLE)
         else:
             self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
     def mount(self):
-        self.instances.append(Text(Vec2(), text="Hello World!"))
+        (width, height) = self.screen.get_size()
+        self.instances.append(Text(Vec2(width/2, height/2), text="Hello World!"))
 
     def run(self):
 
@@ -42,6 +41,7 @@ class Menu(threading.Thread):
             
             pygame.display.flip()
             
+            # pause thread until ready for next frame
             self.clock.tick_busy_loop(60)
 
         

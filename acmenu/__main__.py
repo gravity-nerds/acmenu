@@ -5,7 +5,6 @@ import json
 from menu import Menu 
 
 class Core:
-
     config = None
     threads = {}
 
@@ -14,16 +13,14 @@ class Core:
             self.config = json.loads(f.read())
 
     def start(self):
-        self.threads["menu"] = Menu(self)
-
         for thread in self.threads.values():
             thread.start()
         
+        Menu(self).run()
 
 def main():
     core = Core()
     core.start()
-
 
 if __name__ == "__main__":
     main()
