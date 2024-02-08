@@ -30,6 +30,7 @@ class Vec2:
     def __str__(self):
         return f"Vec2({self.x},{self.y})"
 
+    # Static methods for making code cleaner
     @staticmethod
     def xAxis():
         return Vec2(1, 0)
