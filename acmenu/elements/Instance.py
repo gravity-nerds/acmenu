@@ -17,6 +17,8 @@ class Instance:
         self.anchor_point = paramDefault(kwargs, "anchor_point", Vec2())
         self.visible = paramDefault(kwargs, "visible", True)
 
+        self.zindex = paramDefault(kwargs, "zindex", 0)
+
         # Set id and increment global counters
         self.id = (id_counter := id_counter + 1)
 
@@ -41,7 +43,10 @@ class Instance:
             return self.size.toVec2(Vec2())
 
     def shouldRender(self):
-        return self.parent.shouldRender() and self.visible
+        if self.parent:
+            return self.parent.shouldRender() and self.visible
+        else:
+            return self.visible
 
     def __repr__(self):
         return f"Instance({self.id})"

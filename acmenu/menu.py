@@ -1,10 +1,11 @@
 import pygame
-import threading
 import time
+import random
 
 from libraries.Vec2 import *
 from elements.Text import *
 from elements.Rect import *
+from elements.Circle import *
 
 # Target Frames per seccond
 TARGET_FPS = 60
@@ -36,33 +37,55 @@ class Menu():
             size = UDim2(0, width, 0, height)
         )
 
-        screen_init = Instance(
+        # -- "Press Any Key" screen --
+
+        self.screen_init = Instance(
             size = UDim2(1, 0, 1, 0),
             parent = self.root
         )
 
-        press_any_key = self.addInstance(Text(
+        self.addInstance(Text(
             pos = UDim2(0.5, 0, 0.5, 0),
             anchor_point = Vec2(0.5, 0.5),
             content = "Press Any Key",
-            color = (255, 255, 255),
             font_size = 50,
             font = "assets/JetBrainsMono-SemiBold.ttf",
-            parent = screen_init
+            parent = self.screen_init
         ))
 
-        # create f3 text
-        # this is rendered last seperately
+        self.init_particles = []
+        self.particle_velocities = []
+        for _ in range(100):
+            self.particle_velocities.append(Vec2())
+            self.init_particles.append(self.addInstance(Circle(
+                pos = UDim2(random.random(), 0, random.random(), 0),
+                size = UDim2(0.05, 0, 0.05, 0),
+                anchor_point = Vec2(0.5, 0.5),
+                parent = self.screen_init,
+                color = (255, 255, 255),
+                zindex = -1
+            )))
+
+        # -- Debug --
+
         self.f3_text = Text(
             pos = UDim2(),
             text = "",
             font = "assets/JetBrainsMono-SemiBold.ttf"
         )
 
+        
+        # Resort ZIndexes once (could do whenever an instance is added, however that would hurt)
+        self.sortZIndex()
+
     # Add instance while also providing a reference
     def addInstance(self, instance):
         self.instances.append(instance)
+
         return instance
+
+    def sortZIndex(self):
+        self.instances.sort(key=lambda instance: instance.zindex)
 
     # Check if key is held down
     def isKeyHeld(self, key):
@@ -108,9 +131,30 @@ class Menu():
             # Sets background color and clears previous frame
             self.screen.fill((0,0,0))
 
+            # If visible, tick the press any key particle sim
+            if self.screen_init.shouldRender():
+                # yes this is O(n^2 + n), no i dont care
+
+                
+                for index, particle in enumerate(self.init_particles):
+                    netVel = Vec2()
+                    for other_particle in self.init_particles:
+                        if other_particle != particle:
+                            delta = other_particle.getPos() - particle.getPos()
+                            magnitude = delta.Magnitude()
+                            if magnitude < 100:
+                                netVel += (delta / magnitude) * 10/(magnitude)
+                    self.particle_velocities[index] = netVel
+
+                for index, particle in enumerate(self.init_particles):
+                    newVel = self.particle_velocities[index]
+
+                    particle.pos = UDim2(particle.pos.xs + newVel.x / 1000, 0, particle.pos.ys + newVel.y / 1000, 0)
+
             # Render every instance onto self.screen
             for instance in self.instances:
-                instance.render(self.screen)
+                if instance.shouldRender():
+                    instance.render(self.screen)
 
             # If holding debug key (F3) draw debug text
             if self.isKeyHeld(pygame.K_F3):
@@ -127,6 +171,9 @@ class Menu():
             # pause thread until ready for next frame
             next_frame_target = self._tick_begin + (1/TARGET_FPS)
             time.sleep(max(0, time.time() - next_frame_target))
+
+        pygame.quit()
+        exit()
 
         
         

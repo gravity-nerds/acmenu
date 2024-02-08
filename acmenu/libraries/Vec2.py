@@ -9,8 +9,17 @@ class Vec2:
         ## using pythagoras (a = sqrt(b^2 + c^2))
         return math.sqrt(self.x**2 + self.y**2)
     
+    def Unit(self):
+        return self / self.Magnitude
+
     def tuple(self):
         return (self.x, self.y)
+
+    def minSquare(self):
+        return Vec2(min(self.x, self.y), min(self.x, self.y))
+
+    def maxSquare(self):
+        return Vec2(max(self.x, self.y), max(self.x, self.y))
 
     def __add__(self, other):
         return Vec2(self.x + other.x, self.y + other.y)
@@ -21,7 +30,7 @@ class Vec2:
     def __mul__(self, k):
         return Vec2(self.x * k, self.y * k)
     
-    def __div__(self, k):
+    def __truediv__(self, k):
         return Vec2(self.x / k, self.y / k)
 
     def __repr__(self):

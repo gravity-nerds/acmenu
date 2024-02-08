@@ -12,7 +12,7 @@ class Text(Instance):
             paramDefault(kwargs, "font_size", 20)
         )
 
-        self.color = paramDefault(kwargs, "color", (100, 100, 100))
+        self.color = paramDefault(kwargs, "color", (255, 255, 255))
         self.content = paramDefault(kwargs, "content", "")
 
         self._last_content = None
