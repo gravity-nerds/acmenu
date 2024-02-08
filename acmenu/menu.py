@@ -32,21 +32,36 @@ class Menu():
     def mount(self):
         (width, height) = self.screen.get_size()
 
-        self.root = Instance(size=UDim2(0, width, 0, height))
+        self.root = Instance(
+            size = UDim2(0, width, 0, height)
+        )
 
+        screen_init = Instance(
+            size = UDim2(1, 0, 1, 0),
+            parent = self.root
+        )
 
-        frame = self.addInstance(Rect(
-            UDim2(0.5, 0, 0.5, 0),
-            UDim2(0.5, 0, 0.5, 0),
-            Parent=self.root,
-            border_radius=10
+        press_any_key = self.addInstance(Text(
+            pos = UDim2(0.5, 0, 0.5, 0),
+            anchor_point = Vec2(0.5, 0.5),
+            content = "Press Any Key",
+            color = (255, 255, 255),
+            font_size = 50,
+            font = "assets/JetBrainsMono-SemiBold.ttf",
+            parent = screen_init
         ))
-        self.addInstance(Text(UDim2(0.1, 0, 0.1, 0), text="Game1", color=(255, 255, 255), fontSize=100, Parent=frame))
+
+        print(press_any_key.content)
 
         # create f3 text
         # this is rendered last seperately
-        self.f3_text = Text(UDim2(), "", font = "assets/JetBrainsMono-SemiBold.ttf")
+        self.f3_text = Text(
+            pos = UDim2(),
+            text = "",
+            font = "assets/JetBrainsMono-SemiBold.ttf"
+        )
 
+    # Add instance while also providing a reference
     def addInstance(self, instance):
         self.instances.append(instance)
         return instance
@@ -58,6 +73,7 @@ class Menu():
         else:
             return self.keys[key] # self.keys[key] = true or false
 
+    # Entrypoint
     def run(self):
 
         # Initalisise pygame
@@ -84,6 +100,7 @@ class Menu():
                 if event.type == pygame.QUIT:
                     self.alive = False
 
+                # Update self.keys
                 if event.type == pygame.KEYDOWN:
                     self.keys[event.key] = True
 
@@ -91,7 +108,7 @@ class Menu():
                     self.keys[event.key] = False
 
             # Sets background color and clears previous frame
-            self.screen.fill((255, 255, 255))
+            self.screen.fill((0,0,0))
 
             # Render every instance onto self.screen
             for instance in self.instances:
