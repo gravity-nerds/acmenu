@@ -143,7 +143,7 @@ class Menu():
                             delta = other_particle.getPos() - particle.getPos()
                             magnitude = delta.Magnitude()
                             if magnitude < 100:
-                                netVel += (delta / magnitude) * 10/(magnitude)
+                                netVel += (delta / magnitude) * 10/(magnitude) * -1
                     self.particle_velocities[index] = netVel
 
                 for index, particle in enumerate(self.init_particles):
