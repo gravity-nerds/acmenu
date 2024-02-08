@@ -51,8 +51,6 @@ class Menu():
             parent = screen_init
         ))
 
-        print(press_any_key.content)
-
         # create f3 text
         # this is rendered last seperately
         self.f3_text = Text(
