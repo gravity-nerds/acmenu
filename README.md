@@ -9,8 +9,6 @@
 | YELLOW | WHITE | BLACK |
 | - | - | - |
 | **GREEN** | **RED** | **BLUE** |
-YELLOW WHITE BLACK
-GREEN RED BLUE
 
 ## Control Mapping
 ```
