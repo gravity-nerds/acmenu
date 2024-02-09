@@ -6,6 +6,7 @@ from libraries.Vec2 import *
 from elements.Text import *
 from elements.Rect import *
 from elements.Circle import *
+from libraries.Util import lerp
 
 # Target Frames per seccond
 TARGET_FPS = 60
@@ -24,6 +25,12 @@ class Menu():
 
     # map of which keys are held (used by isKeyHeld)
     keys = {}
+
+    # target position for the menu shifting system
+    targetUDim = UDim2()
+
+    # games
+    loaded_games = ["Game1", "Game2", "Game3", "Game4", "Game5", "Game6"]
 
     def __init__(self, acmenu):
         # If in dev mode, dont launch in fullscreen
@@ -56,6 +63,49 @@ class Menu():
             parent = self.screen_init
         ))
 
+        # -- "Press Any Key" screen --
+
+        self.games_screen = Instance(
+            pos = UDim2(0, 0, 1, 0),
+            size = UDim2(1, 0, 1, 0),
+            parent = self.root
+        )
+
+        self.addInstance(Text(
+            pos = UDim2(0.5, 0, 0.1, 0),
+            anchor_point = Vec2(0.5, 0.5),
+            content = "This is the games screen",
+            font_size = 20,
+            font = "assets/JetBrainsMono-SemiBold.ttf",
+            parent = self.games_screen
+        ))
+        
+        GAMES_PER_SCREEN = 4
+
+        self.games_screen_carousel = self.addInstance(Instance(
+            pos = UDim2(0.1, 0, 0.15, 0),
+            size = UDim2(len(self.loaded_games) * 1/GAMES_PER_SCREEN, 0, 0.7, 0),
+            parent = self.games_screen
+        ))
+
+        for index, game in enumerate(self.loaded_games):
+            game_root = self.addInstance(Rect(
+                pos = UDim2(1/len(self.loaded_games)*index, 0, 0, 0),
+                size = UDim2(1/len(self.loaded_games), -10, 1, 0),
+                color = (255, 255, 255),
+                parent = self.games_screen_carousel
+            ))
+
+            self.addInstance(Text(
+                pos = UDim2(0.5, 0, 0.1, 0),
+                anchor_point = Vec2(0.5, 0.5),
+                content = game,
+                font_size = 25,
+                color = (0, 0, 0),
+                font = "assets/JetBrainsMono-SemiBold.ttf",
+                parent = game_root
+            ))
+
         self.init_particles = []
         for _ in range(50):
             self.init_particles.append(self.addInstance(Circle(
@@ -67,7 +117,6 @@ class Menu():
                 zindex = -1
             )))
 
-        self.init_particles[1].color = (255, 0, 0)
         
         # -- Debug --
 
@@ -76,7 +125,6 @@ class Menu():
             text = "",
             font = "assets/JetBrainsMono-SemiBold.ttf"
         )
-
         
         # Resort ZIndexes once (could do whenever an instance is added, however that would hurt)
         self.sortZIndex()
@@ -120,12 +168,14 @@ class Menu():
             self.root.size = UDim2(0, width, 0, height)
 
             # Handle all events
+            any_key_event = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.alive = False
 
                 # Update self.keys
                 if event.type == pygame.KEYDOWN:
+                    any_key_event = True
                     self.keys[event.key] = True
 
                 if event.type == pygame.KEYUP:
@@ -152,6 +202,33 @@ class Menu():
                         m = (px_pos - other_particle_px_pos).Magnitude()
                         if m < 50:
                             pygame.draw.line(self.screen, (math.floor(255 * m/50), math.floor(255 * m/50), math.floor(255 * m/50)), px_pos.tuple(), other_particle_px_pos.tuple())
+
+
+            # Update screen positions utlising lerp
+            # TODO: fix fps increasing after unloading main menu making the transition abruptly change speed
+            alpha = 0.01
+
+            self.screen_init.pos = UDim2(
+                lerp(self.screen_init.pos.xs, self.targetUDim.xs, alpha),
+                lerp(self.screen_init.pos.xo, self.targetUDim.xo, alpha),
+                lerp(self.screen_init.pos.ys, self.targetUDim.ys, alpha),
+                lerp(self.screen_init.pos.yo, self.targetUDim.yo, alpha)
+            )
+            self.screen_init.visible = self.screen_init.pos.ys > -0.95
+    
+            self.games_screen.pos = UDim2(
+                lerp(self.games_screen.pos.xs, self.targetUDim.xs, alpha),
+                lerp(self.games_screen.pos.xo, self.targetUDim.xo, alpha),
+                lerp(self.games_screen.pos.ys, self.targetUDim.ys + 1, alpha),
+                lerp(self.games_screen.pos.yo, self.targetUDim.yo, alpha)
+            )
+            self.games_screen.visible = self.games_screen.pos.ys > -0.95
+
+            # Update target screen positions depending on key state
+            if self.isKeyHeld(pygame.K_ESCAPE):
+                self.targetUDim = UDim2(0, 0, 0, 0)
+            elif any_key_event and self.screen_init.shouldRender():
+                self.targetUDim = UDim2(0, 0, -1, 0)
 
             # Render every instance onto self.screen
             for instance in self.instances:
