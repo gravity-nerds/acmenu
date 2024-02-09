@@ -6,10 +6,12 @@ from libraries.Vec2 import *
 from elements.Text import *
 from elements.Rect import *
 from elements.Circle import *
-from libraries.Util import lerp
+from libraries.Util import lerp, clamp
+from control_mappings import LAYOUT_FRONT
 
 # Target Frames per seccond
 TARGET_FPS = 60
+GAMES_PER_SCREEN = 4
 
 # Menu Class (Holds UI Tree logic)
 class Menu():
@@ -30,7 +32,8 @@ class Menu():
     targetUDim = UDim2()
 
     # games
-    loaded_games = ["Game1", "Game2", "Game3", "Game4", "Game5", "Game6"]
+    focused_game_index = 0
+    loaded_games = ["Game1", "Game2", "Game3", "Game4", "Game5", "Game6", "Game7", "Game8", "Game9", "Game10"]
 
     def __init__(self, acmenu):
         # If in dev mode, dont launch in fullscreen
@@ -80,10 +83,11 @@ class Menu():
             parent = self.games_screen
         ))
         
-        GAMES_PER_SCREEN = 4
 
+        self.games_screen_carousel_udim_target = UDim2(0.1, 0, 0.15, 0)
         self.games_screen_carousel = self.addInstance(Instance(
-            pos = UDim2(0.1, 0, 0.15, 0),
+            pos = UDim2(0.5, 0, 0.15, 0),
+            anchor_point = Vec2(0.5, 0),
             size = UDim2(len(self.loaded_games) * 1/GAMES_PER_SCREEN, 0, 0.7, 0),
             parent = self.games_screen
         ))
@@ -91,6 +95,7 @@ class Menu():
         for index, game in enumerate(self.loaded_games):
             game_root = self.addInstance(Rect(
                 pos = UDim2(1/len(self.loaded_games)*index, 0, 0, 0),
+                anchor_point = Vec2(0.5, 0),
                 size = UDim2(1/len(self.loaded_games), -10, 1, 0),
                 color = (255, 255, 255),
                 parent = self.games_screen_carousel
@@ -178,6 +183,12 @@ class Menu():
                     any_key_event = True
                     self.keys[event.key] = True
 
+                    if event.key == LAYOUT_FRONT.P1_RIGHT:
+                        self.focused_game_index = clamp(self.focused_game_index + 1, 0, len(self.loaded_games)-1)
+                    if event.key == LAYOUT_FRONT.P1_LEFT:
+                        self.focused_game_index = clamp(self.focused_game_index - 1, 0, len(self.loaded_games)-1)
+
+
                 if event.type == pygame.KEYUP:
                     self.keys[event.key] = False
 
@@ -206,7 +217,7 @@ class Menu():
 
             # Update screen positions utlising lerp
             # TODO: fix fps increasing after unloading main menu making the transition abruptly change speed
-            alpha = 0.01
+            alpha = 0.02
 
             self.screen_init.pos = UDim2(
                 lerp(self.screen_init.pos.xs, self.targetUDim.xs, alpha),
@@ -223,6 +234,25 @@ class Menu():
                 lerp(self.games_screen.pos.yo, self.targetUDim.yo, alpha)
             )
             self.games_screen.visible = self.games_screen.pos.ys > -0.95
+
+            # do not ask me how this maths works.
+            # TODO: rip this out and acctually figure the maths out properly
+            init_offset = ((len(self.loaded_games) + math.floor(len(self.loaded_games)/2))/2)*(1/GAMES_PER_SCREEN)
+            init_offset -= (0.5/GAMES_PER_SCREEN)
+
+            self.games_screen_carousel_udim_target = UDim2(
+                init_offset - (len(self.loaded_games)/GAMES_PER_SCREEN/len(self.loaded_games)) * self.focused_game_index,
+                0,
+                0.15,
+                0
+            )
+
+            self.games_screen_carousel.pos = UDim2(
+                lerp(self.games_screen_carousel.pos.xs, self.games_screen_carousel_udim_target.xs, 0.05),
+                self.games_screen_carousel_udim_target.xo,
+                self.games_screen_carousel_udim_target.ys,
+                self.games_screen_carousel_udim_target.yo
+            )
 
             # Update target screen positions depending on key state
             if self.isKeyHeld(pygame.K_ESCAPE):

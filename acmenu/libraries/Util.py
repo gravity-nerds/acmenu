@@ -5,3 +5,6 @@ def paramDefault(kwargs, id, default):
 
 def lerp(a, b, t):
     return a + (b - a) * t
+
+def clamp(x, mi, ma):
+    return max(mi, min(x, ma))
