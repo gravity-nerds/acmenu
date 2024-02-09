@@ -1,6 +1,10 @@
-import pygame
 import time
 import random
+import os
+
+# make pygame shut
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+import pygame
 
 from libraries.Vec2 import *
 from elements.Text import *

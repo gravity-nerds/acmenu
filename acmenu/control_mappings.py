@@ -15,9 +15,9 @@ class LAYOUT_GAME:
 # both players standing at front of table
 class LAYOUT_FRONT:
     P1_UP = pygame.K_d
-    P1_LEFT = pygame.K_w
+    P1_LEFT = pygame.K_s
     P1_DOWN = pygame.K_a
-    P1_RIGHT = pygame.K_s
+    P1_RIGHT = pygame.K_w
 
     P2_UP = pygame.K_l
     P2_LEFT = pygame.K_i
