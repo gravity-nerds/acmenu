@@ -19,6 +19,9 @@ class Menu():
     # array of all instances to be rendered
     instances = []
 
+    # Keep track of current frame number
+    frame_counter = 0
+
     # map of which keys are held (used by isKeyHeld)
     keys = {}
 
@@ -54,18 +57,18 @@ class Menu():
         ))
 
         self.init_particles = []
-        self.particle_velocities = []
-        for _ in range(100):
-            self.particle_velocities.append(Vec2())
+        for _ in range(50):
             self.init_particles.append(self.addInstance(Circle(
                 pos = UDim2(random.random(), 0, random.random(), 0),
-                size = UDim2(0.05, 0, 0.05, 0),
+                size = UDim2(0.01, 0, 0.01, 0),
                 anchor_point = Vec2(0.5, 0.5),
                 parent = self.screen_init,
                 color = (255, 255, 255),
                 zindex = -1
             )))
 
+        self.init_particles[1].color = (255, 0, 0)
+        
         # -- Debug --
 
         self.f3_text = Text(
@@ -133,23 +136,22 @@ class Menu():
 
             # If visible, tick the press any key particle sim
             if self.screen_init.shouldRender():
-                # yes this is O(n^2 + n), no i dont care
-
-                
                 for index, particle in enumerate(self.init_particles):
-                    netVel = Vec2()
-                    for other_particle in self.init_particles:
-                        if other_particle != particle:
-                            delta = other_particle.getPos() - particle.getPos()
-                            magnitude = delta.Magnitude()
-                            if magnitude < 100:
-                                netVel += (delta / magnitude) * 10/(magnitude) * -1
-                    self.particle_velocities[index] = netVel
+                    calculated_position = UDim2(
+                        (math.cos(self.frame_counter / (math.pi * 500) + index * math.pi/25)/3 + 0.5) + math.cos(self.frame_counter / 1000 + index * 10) / 10,
+                        0,
+                        (math.sin(self.frame_counter / (math.pi * 500) + index * math.pi/25)/3 + 0.5) + math.sin(self.frame_counter / 1000 + index * 10) / 10,
+                        0
+                    )
+                    particle.pos = calculated_position
+                    px_pos = particle.getPos()
 
-                for index, particle in enumerate(self.init_particles):
-                    newVel = self.particle_velocities[index]
+                    for other_particle in self.init_particles[index-4:index+4]:
+                        other_particle_px_pos = other_particle.getPos()
 
-                    particle.pos = UDim2(particle.pos.xs + newVel.x / 1000, 0, particle.pos.ys + newVel.y / 1000, 0)
+                        m = (px_pos - other_particle_px_pos).Magnitude()
+                        if m < 50:
+                            pygame.draw.line(self.screen, (math.floor(255 * m/50), math.floor(255 * m/50), math.floor(255 * m/50)), px_pos.tuple(), other_particle_px_pos.tuple())
 
             # Render every instance onto self.screen
             for instance in self.instances:
@@ -167,6 +169,7 @@ class Menu():
 
             # force pygame to update the screen
             pygame.display.flip()
+            self.frame_counter += 1
             
             # pause thread until ready for next frame
             next_frame_target = self._tick_begin + (1/TARGET_FPS)
