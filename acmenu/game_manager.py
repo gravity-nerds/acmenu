@@ -19,6 +19,8 @@ class GameManager(threading.Thread):
                 self.load_game(path + f"/{folder_name}")
             except Exception as e:
                 self.acmenu.logger.error(f"Failed to load {folder_name} | {e}")
+        
+        self.acmenu.logger.info(f"Loaded {len(self.games)} game(s)")
 
     def load_game(self, path):
         assert os.path.exists(f"{path}/acmenu.json"), "missing acmenu.json"
@@ -30,7 +32,7 @@ class GameManager(threading.Thread):
             assert "friendlyname" in game_data, "acmenu.json: missing {friendlyname:string}"
             assert "version" in game_data, "acmenu.json: missing {version:string}"
 
-        self.games[game_data["name"]] = game_data
+        self.games[path.split("/")[-1]] = game_data
             
 
     def run(self):

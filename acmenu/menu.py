@@ -15,7 +15,7 @@ from control_mappings import LAYOUT_FRONT
 
 # Target Frames per seccond
 TARGET_FPS = 60
-GAMES_PER_SCREEN = 4
+GAMES_PER_SCREEN = 2
 
 # Menu Class (Holds UI Tree logic)
 class Menu():
@@ -40,6 +40,9 @@ class Menu():
     loaded_games = ["Game1", "Game2", "Game3", "Game4", "Game5", "Game6", "Game7", "Game8", "Game9", "Game10"]
 
     def __init__(self, acmenu):
+
+        self.acmenu = acmenu
+
         # If in dev mode, dont launch in fullscreen
         if acmenu.config["dev"]:
             self.screen = pygame.display.set_mode((1000, 500), pygame.RESIZABLE)
@@ -70,7 +73,9 @@ class Menu():
             parent = self.screen_init
         ))
 
-        # -- "Press Any Key" screen --
+        # -- "Games" screen --
+
+        self.loaded_games = self.acmenu.threads["game_manager"].games
 
         self.games_screen = Instance(
             pos = UDim2(0, 0, 1, 0),
@@ -96,9 +101,10 @@ class Menu():
             parent = self.games_screen
         ))
 
-        for index, game in enumerate(self.loaded_games):
+        i = 0
+        for game_id, game in self.loaded_games.items():
             game_root = self.addInstance(Rect(
-                pos = UDim2(1/len(self.loaded_games)*index, 0, 0, 0),
+                pos = UDim2(1/len(self.loaded_games)*i, 0, 0, 0),
                 anchor_point = Vec2(0.5, 0),
                 size = UDim2(1/len(self.loaded_games), -10, 1, 0),
                 color = (255, 255, 255),
@@ -108,12 +114,14 @@ class Menu():
             self.addInstance(Text(
                 pos = UDim2(0.5, 0, 0.1, 0),
                 anchor_point = Vec2(0.5, 0.5),
-                content = game,
+                content = game["friendlyname"],
                 font_size = 25,
                 color = (0, 0, 0),
                 font = "assets/JetBrainsMono-SemiBold.ttf",
                 parent = game_root
             ))
+
+            i += 1
 
         self.init_particles = []
         for _ in range(50):
@@ -239,20 +247,22 @@ class Menu():
             )
             self.games_screen.visible = self.games_screen.pos.ys > -0.95
 
-            # do not ask me how this maths works.
-            # TODO: rip this out and acctually figure the maths out properly
-            init_offset = ((len(self.loaded_games) + math.floor(len(self.loaded_games)/2))/2)*(1/GAMES_PER_SCREEN)
-            init_offset -= (0.5/GAMES_PER_SCREEN)
+            
+            init_offset = (len(self.loaded_games))/(GAMES_PER_SCREEN)
+
+            if len(self.loaded_games) % 2 == 1:
+                init_offset -= (len(self.loaded_games)//2)/GAMES_PER_SCREEN
+                init_offset += 0.5/GAMES_PER_SCREEN
 
             self.games_screen_carousel_udim_target = UDim2(
-                init_offset - (len(self.loaded_games)/GAMES_PER_SCREEN/len(self.loaded_games)) * self.focused_game_index,
+                init_offset - self.focused_game_index * 1/GAMES_PER_SCREEN,
                 0,
                 0.15,
                 0
             )
 
             self.games_screen_carousel.pos = UDim2(
-                lerp(self.games_screen_carousel.pos.xs, self.games_screen_carousel_udim_target.xs, 0.05),
+                lerp(self.games_screen_carousel.pos.xs, self.games_screen_carousel_udim_target.xs, 0.01),
                 self.games_screen_carousel_udim_target.xo,
                 self.games_screen_carousel_udim_target.ys,
                 self.games_screen_carousel_udim_target.yo
@@ -286,6 +296,7 @@ class Menu():
             next_frame_target = self._tick_begin + (1/TARGET_FPS)
             time.sleep(max(0, time.time() - next_frame_target))
 
+        # Nuke the process after the window is closed
         pygame.quit()
         exit()
 
