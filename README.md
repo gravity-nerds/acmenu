@@ -6,6 +6,9 @@
 ./display_calibrator => used for figuring out where the hell the corners of the screen are in pixel space
 
 ## Button Colors
+| YELLOW | WHITE | BLACK |
+| - | - | - |
+| **GREEN** | **RED** | **BLUE** |
 YELLOW WHITE BLACK
 GREEN RED BLUE
 
