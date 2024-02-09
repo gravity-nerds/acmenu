@@ -15,7 +15,7 @@ from control_mappings import LAYOUT_FRONT
 
 # Target Frames per seccond
 TARGET_FPS = 60
-GAMES_PER_SCREEN = 2
+GAMES_PER_SCREEN = 4
 
 # Menu Class (Holds UI Tree logic)
 class Menu():
@@ -252,7 +252,7 @@ class Menu():
 
             if len(self.loaded_games) % 2 == 1:
                 init_offset -= (len(self.loaded_games)//2)/GAMES_PER_SCREEN
-                init_offset += 0.5/GAMES_PER_SCREEN
+                init_offset += 1.5/GAMES_PER_SCREEN
 
             self.games_screen_carousel_udim_target = UDim2(
                 init_offset - self.focused_game_index * 1/GAMES_PER_SCREEN,
