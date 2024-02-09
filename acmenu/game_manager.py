@@ -26,14 +26,22 @@ class GameManager(threading.Thread):
         assert os.path.exists(f"{path}/acmenu.json"), "missing acmenu.json"
         assert os.path.exists(f"{path}/run.sh"), "missing run.json"
 
+        id = path.split("/")[-1]
+
         with open(f"{path}/acmenu.json") as f:
             game_data = json.loads(f.read())
 
             assert "friendlyname" in game_data, "acmenu.json: missing {friendlyname:string}"
             assert "version" in game_data, "acmenu.json: missing {version:string}"
 
-        self.games[path.split("/")[-1]] = game_data
-            
+            game_data["id"] = id
+
+        self.games[id] = game_data
+
+    def start_game(self, id):
+        game = self.games[id]
+
+        print(game)
 
     def run(self):
         self.load_games(self.acmenu.config["gamesPath"])

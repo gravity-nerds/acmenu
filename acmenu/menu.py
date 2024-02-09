@@ -11,10 +11,10 @@ from elements.Text import *
 from elements.Rect import *
 from elements.Circle import *
 from libraries.Util import lerp, clamp
-from control_mappings import LAYOUT_FRONT
+from control_mappings import LAYOUT_FRONT, getControlName
 
 # Target Frames per seccond
-TARGET_FPS = 60
+TARGET_FPS = 30
 GAMES_PER_SCREEN = 4
 
 # Menu Class (Holds UI Tree logic)
@@ -37,7 +37,7 @@ class Menu():
 
     # games
     focused_game_index = 0
-    loaded_games = ["Game1", "Game2", "Game3", "Game4", "Game5", "Game6", "Game7", "Game8", "Game9", "Game10"]
+    loaded_games = {}
 
     def __init__(self, acmenu):
 
@@ -86,7 +86,7 @@ class Menu():
         self.addInstance(Text(
             pos = UDim2(0.5, 0, 0.1, 0),
             anchor_point = Vec2(0.5, 0.5),
-            content = "This is the games screen",
+            content = "Select a game:",
             font_size = 20,
             font = "assets/JetBrainsMono-SemiBold.ttf",
             parent = self.games_screen
@@ -102,7 +102,11 @@ class Menu():
         ))
 
         i = 0
+        self.game_array = []
+        self.game_hint_texts = []
         for game_id, game in self.loaded_games.items():
+            self.game_array.append(game)
+
             game_root = self.addInstance(Rect(
                 pos = UDim2(1/len(self.loaded_games)*i, 0, 0, 0),
                 anchor_point = Vec2(0.5, 0),
@@ -121,6 +125,28 @@ class Menu():
                 parent = game_root
             ))
 
+            self.addInstance(Text(
+                pos = UDim2(0.5, 0, 0.5, 0),
+                anchor_point = Vec2(0.5, 0.5),
+                content = "cover art",
+                font_size = 16,
+                color = (0, 0, 0),
+                font = "assets/JetBrainsMono-SemiBold.ttf",
+                parent = game_root
+            ))
+
+            hint_text = self.addInstance(Text(
+                pos = UDim2(0.5, 0, 1, 0),
+                anchor_point = Vec2(0.5, 0),
+                content = f"Push {getControlName(LAYOUT_FRONT.P1_A)} to select",
+                font_size = 16,
+                color = (0, 0, 0),
+                font = "assets/JetBrainsMono-SemiBold.ttf",
+                parent = game_root
+            ))
+
+            self.game_hint_texts.append(hint_text)
+
             i += 1
 
         self.init_particles = []
@@ -128,13 +154,69 @@ class Menu():
             self.init_particles.append(self.addInstance(Circle(
                 pos = UDim2(random.random(), 0, random.random(), 0),
                 size = UDim2(0.01, 0, 0.01, 0),
-                anchor_point = Vec2(0.5, 0.5),
+                anchor_point = Vec2(1,1),
                 parent = self.screen_init,
                 color = (255, 255, 255),
                 zindex = -1
             )))
 
+        # -- "Play Game" screen --
         
+        self.game_screen = Instance(
+            pos = UDim2(0, 0, 2, 0),
+            size = UDim2(1, 0, 1, 0),
+            parent = self.root
+        )
+
+        self.addInstance(Rect(
+            pos = UDim2(0.25, 0, 0.5, 0),
+            size = UDim2(0.4, 0, 0.9, 0),
+            anchor_point = Vec2(0.5, 0.5),
+
+            border_radius = 10,
+
+            color = (255, 255, 255),
+
+            parent = self.game_screen
+        ))
+
+        self.game_title_text = self.addInstance(Text(
+            pos = UDim2(0.1, 0, 0.1, 0),
+
+            color = (0, 0, 0),
+
+            content = "<GameName>",
+            font_size = 50,
+
+            parent = self.game_screen
+        ))
+
+        self.game_version_text = self.addInstance(Text(
+            pos = UDim2(0.1, 0, 0.2, 0),
+
+            color = (0, 0, 0),
+
+            content = "<GameVersion>",
+            font_size = 30,
+
+            parent = self.game_screen
+        ))
+
+        self.addInstance(Text(
+            pos = UDim2(0.1, 0, 0.3, 0),
+
+            color = (0, 0, 0),
+
+            content = f"Push {getControlName(LAYOUT_FRONT.P1_A)} and {getControlName(LAYOUT_FRONT.P1_C)} to start",
+            font_size = 30,
+
+            parent = self.game_screen
+        ))
+
+        self.loaded_games = self.acmenu.threads["game_manager"].games
+
+        
+
         # -- Debug --
 
         self.f3_text = Text(
@@ -151,6 +233,11 @@ class Menu():
         self.instances.append(instance)
 
         return instance
+
+    def loadGameInfo(self):
+        loaded_game = self.game_array[self.focused_game_index]
+        self.game_title_text.content = loaded_game["friendlyname"]
+        self.game_version_text.content = loaded_game["version"]
 
     def sortZIndex(self):
         self.instances.sort(key=lambda instance: instance.zindex)
@@ -172,6 +259,9 @@ class Menu():
 
         # Create all ui instances
         self.mount()
+
+        start_game_hold = False
+        start_game_hold_begin = True
         
         # Main Loop
         while self.alive:
@@ -245,7 +335,13 @@ class Menu():
                 lerp(self.games_screen.pos.ys, self.targetUDim.ys + 1, alpha),
                 lerp(self.games_screen.pos.yo, self.targetUDim.yo, alpha)
             )
-            self.games_screen.visible = self.games_screen.pos.ys > -0.95
+
+            self.game_screen.pos = UDim2(
+                lerp(self.game_screen.pos.xs, self.targetUDim.xs, alpha),
+                lerp(self.game_screen.pos.xo, self.targetUDim.xo, alpha),
+                lerp(self.game_screen.pos.ys, self.targetUDim.ys + 2, alpha),
+                lerp(self.game_screen.pos.yo, self.targetUDim.yo, alpha)
+            )
 
             
             init_offset = (len(self.loaded_games))/(GAMES_PER_SCREEN)
@@ -268,11 +364,36 @@ class Menu():
                 self.games_screen_carousel_udim_target.yo
             )
 
+            for hint_text in self.game_hint_texts:
+                delta = abs(hint_text.getPos().x + 80 - width/2)
+                c = clamp(-delta + 200, 0, 255)
+                hint_text.color = (c, c, c)
+
+
             # Update target screen positions depending on key state
             if self.isKeyHeld(pygame.K_ESCAPE):
                 self.targetUDim = UDim2(0, 0, 0, 0)
             elif any_key_event and self.screen_init.shouldRender():
                 self.targetUDim = UDim2(0, 0, -1, 0)
+            elif self.isKeyHeld(LAYOUT_FRONT.P1_A) and self.games_screen.pos.ys > -0.05:
+                # Select Game to play
+                self.loadGameInfo()
+                self.targetUDim = UDim2(0, 0, -2, 0)
+            elif self.isKeyHeld(LAYOUT_FRONT.P1_F) and self.game_screen.pos.ys > -0.05:
+                self.targetUDim = UDim2(0, 0, -1, 0)
+
+
+            if self.isKeyHeld(LAYOUT_FRONT.P1_A) and self.isKeyHeld(LAYOUT_FRONT.P1_C):
+                if not start_game_hold:
+                    start_game_hold = True
+                    start_game_hold_begin = time.time()
+            else:
+                start_game_hold = False
+
+            if start_game_hold_begin + 1 < time.time() and start_game_hold:
+                start_game_hold = False
+
+                self.acmenu.threads["game_manager"].start_game(self.game_array[self.focused_game_index].id)
 
             # Render every instance onto self.screen
             for instance in self.instances:
