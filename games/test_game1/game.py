@@ -1,5 +1,15 @@
-with open("./acproto") as f:
-    for line in f:
-        print(line)
+import sys
 
-input("This is amazing game!!!!!!\n")
+sys.path.append("../../lib")
+
+from acproto import AcProto
+
+protocol = AcProto("./acproto")
+
+@protocol.onLine
+def listener(*args):
+    print(*args)
+
+protocol.start()
+
+input("TOTALLY REAL GAME\n")

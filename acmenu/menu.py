@@ -14,7 +14,7 @@ from libraries.Util import lerp, clamp
 from control_mappings import LAYOUT_FRONT, getControlName
 
 # Target Frames per seccond
-TARGET_FPS = 30
+TARGET_FPS = 60
 GAMES_PER_SCREEN = 4
 
 # Menu Class (Holds UI Tree logic)
@@ -393,7 +393,7 @@ class Menu():
             if start_game_hold_begin + 1 < time.time() and start_game_hold:
                 start_game_hold = False
 
-                self.acmenu.threads["game_manager"].start_game(self.game_array[self.focused_game_index].id)
+                self.acmenu.threads["game_manager"].start_game(self.game_array[self.focused_game_index]["id"])
 
             # Render every instance onto self.screen
             for instance in self.instances:
