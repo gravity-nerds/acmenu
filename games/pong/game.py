@@ -100,12 +100,15 @@ def main():
     bx = w//2
     by = h//2
 
+
     while running:
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT: 
                 running = False
-
+        startime = time.time();
         tick(screen)
+
+        time.sleep( max(0, (1/60) - (time.time() - startime)))
 
 
 if __name__ == "__main__":
