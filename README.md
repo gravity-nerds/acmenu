@@ -45,3 +45,7 @@ Top Left Corner (38,16)
 Bottom Right Corner (1254,700)
 
 Usable Space: (1216, 684)
+
+
+big: 216,0 1716,1080 1500,1080
+mini: 0,0 1022,767 1022,767
