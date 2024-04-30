@@ -23,7 +23,7 @@ def tick(screen):
 
     keys = pygame.key.get_pressed()
     (w, h) = screen.get_size()
-
+    
 
     if keys[LAYOUT_GAME.P1_RIGHT] and gaming:
         p1 += 1
