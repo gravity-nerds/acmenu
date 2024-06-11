@@ -62,6 +62,18 @@ def tick(screen):
         asteroid[0] += asteroid[3] # TODO: FIX
         asteroid[1] += asteroid[4]
 
+        if asteroid[0] < -20:
+            asteroid[0] = w
+
+        if asteroid[0] > w + 20:
+            asteroid[0] = 0
+
+        if asteroid[1] < -20:
+            asteroid[1] = h
+
+        if asteroid[1] > h + 20:
+            asteroid[1] = 0
+
         for i in range(POINTS):
             a1 = asteroid[2] + i * ((math.pi * 2) / POINTS)
             a2 = asteroid[2] + (i + 1) * ((math.pi * 2) / POINTS)
@@ -75,11 +87,12 @@ def tick(screen):
             )
 
     SIZE = 25
+    COLOR = (0, 255, 0)
 
-    pygame.draw.line(screen, (255, 255, 255), (px + math.cos(pr) * SIZE, py + math.sin(pr) * SIZE), (px + math.cos(pr + 2.5) * SIZE, py + math.sin(pr + 2.5) * SIZE), 2)
-    pygame.draw.line(screen, (255, 255, 255), (px + math.cos(pr) * SIZE, py + math.sin(pr) * SIZE), (px + math.cos(pr - 2.5) * SIZE, py + math.sin(pr - 2.5) * SIZE), 2)
-    pygame.draw.line(screen, (255, 255, 255), (px + math.cos(pr + math.pi) * SIZE / 2, py + math.sin(pr + math.pi) * SIZE / 2), (px + math.cos(pr + 2.5) * SIZE, py + math.sin(pr + 2.5) * SIZE), 2)
-    pygame.draw.line(screen, (255, 255, 255), (px + math.cos(pr + math.pi) * SIZE / 2, py + math.sin(pr + math.pi) * SIZE / 2), (px + math.cos(pr - 2.5) * SIZE, py + math.sin(pr - 2.5) * SIZE), 2)
+    pygame.draw.line(screen, COLOR, (px + math.cos(pr) * SIZE, py + math.sin(pr) * SIZE), (px + math.cos(pr + 2.5) * SIZE, py + math.sin(pr + 2.5) * SIZE), 2)
+    pygame.draw.line(screen, COLOR, (px + math.cos(pr) * SIZE, py + math.sin(pr) * SIZE), (px + math.cos(pr - 2.5) * SIZE, py + math.sin(pr - 2.5) * SIZE), 2)
+    pygame.draw.line(screen, COLOR, (px + math.cos(pr + math.pi) * SIZE / 2, py + math.sin(pr + math.pi) * SIZE / 2), (px + math.cos(pr + 2.5) * SIZE, py + math.sin(pr + 2.5) * SIZE), 2)
+    pygame.draw.line(screen, COLOR, (px + math.cos(pr + math.pi) * SIZE / 2, py + math.sin(pr + math.pi) * SIZE / 2), (px + math.cos(pr - 2.5) * SIZE, py + math.sin(pr - 2.5) * SIZE), 2)
 
     pygame.display.flip()
 
