@@ -94,7 +94,7 @@ def main():
     global my_font
     global gaming
 
-    screen = pygame.display.set_mode((1000, 500)) 
+    screen = pygame.display.set_mode((1000, 500), pygame.FULLSCREEN) 
     running = True
 
     pygame.font.init()
