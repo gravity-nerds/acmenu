@@ -5,6 +5,7 @@ BJrGxp
 #### Info:
 ./acmenu => main menu
 ./games => collection of games that run on the table
+./game_storage => collection of files that need to be read and write able + persistent
 ./display_calibrator => used for figuring out where the hell the corners of the screen are in pixel space
 
 ## Button Colors
